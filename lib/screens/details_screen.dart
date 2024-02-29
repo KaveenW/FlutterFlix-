@@ -1,11 +1,14 @@
-
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutflix/api/api.dart';
 import 'package:flutflix/constants.dart';
 import 'package:flutflix/models/movie.dart';
 import 'package:flutflix/models/tv_show.dart';
-
+import 'package:flutflix/widgets/bottom_navigation_bar.dart';
+import 'package:flutflix/widgets/movie_page_buttons.dart';
+import 'package:flutflix/widgets/rating_star.dart';
+import 'package:flutflix/widgets/recommendationWidget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MovieScreen extends StatefulWidget {
@@ -26,6 +29,7 @@ class MovieScreen extends StatefulWidget {
 
 class _MovieScreenState extends State<MovieScreen> {
   bool isExpanded = false;
+
   void _addToWatchLater() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String key =
@@ -37,10 +41,26 @@ class _MovieScreenState extends State<MovieScreen> {
 
   void _addToWatched() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String key = widget.movie != null ? 'watchedMovies' : 'wacthedTvShows';
+    String key = widget.movie != null
+        ? 'watchedMovies'
+        : 'watchedTVShows'; // Adjusted key based on the type of content
     List<String> watchedList = prefs.getStringList(key) ?? [];
     watchedList.add(jsonEncode(widget.movie ?? widget.tvShow));
     await prefs.setStringList(key, watchedList);
+  }
+
+  Future<List<dynamic>> _fetchRecommendations() async {
+    try {
+      if (widget.movie != null) {
+        return await Api().getMovieRecommendations(widget.movie!.id);
+      } else if (widget.tvShow != null) {
+        return await Api().getTvShowRecommendations(widget.tvShow!.id);
+      } else {
+        return []; // Return an empty list if neither movie nor tvShow is provided
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch recommendations: $e');
+    }
   }
 
   @override
@@ -69,17 +89,25 @@ class _MovieScreenState extends State<MovieScreen> {
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 10, horizontal: 25),
                     child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            child: BackButton(
-                              color: Colors.white,
-                            ),
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          child: BackButton(
+                            color: Colors.white,
                           ),
-                        ]),
+                        ),
+                        SizedBox(
+                          width: 170,
+                        ),
+                        MoviePageButtons(
+                          onAddPressed: _addToWatchLater,
+                          onWatchedPressed: _addToWatched,
+                        ),
+                      ],
+                    ),
                   ),
                   SizedBox(height: 60),
                   Padding(
@@ -131,6 +159,13 @@ class _MovieScreenState extends State<MovieScreen> {
                                       color: Colors.white,
                                     ),
                                   ),
+                                  RatingStars(
+                                    rating: widget.movie?.voteAverage ??
+                                        widget.tvShow?.voteAverage ??
+                                        0,
+                                    starSize: 16,
+                                    color: Colors.yellow,
+                                  ),
                                 ],
                               ),
                             ],
@@ -139,9 +174,7 @@ class _MovieScreenState extends State<MovieScreen> {
                       ],
                     ),
                   ),
-                  SizedBox(
-                    height: 10,
-                  ),
+                  SizedBox(height: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -236,11 +269,34 @@ class _MovieScreenState extends State<MovieScreen> {
                     ),
                   ),
                   SizedBox(height: 15),
+                  Container(
+                    height: MediaQuery.of(context).size.height * 0.25,
+                    child: FutureBuilder<List<dynamic>>(
+                      future: _fetchRecommendations(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else {
+                          final recommendations = snapshot.data ?? [];
+                          return RecommendationWidget(
+                            recommendations: recommendations,
+                          );
+                        }
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: CustomBottomNavigationBar(
+        currentIndex: 0,
+        onTap: (index) {},
       ),
     );
   }
