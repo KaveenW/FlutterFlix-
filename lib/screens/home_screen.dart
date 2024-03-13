@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutflix/api/api.dart';
 import 'package:flutflix/models/movie.dart';
 import 'package:flutflix/models/tv_show.dart';
@@ -36,6 +37,11 @@ class _HomeScreenState extends State<HomeScreen> {
     familyFriendlyMovies = Api().getFamilyFriendlyMovies();
 
     // Add listener to Connectivity stream
+    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+      setState(() {
+        _isOnline = result != ConnectivityResult.none;
+      });
+    });
   }
 
   @override

@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -6,6 +8,7 @@ import 'package:flutflix/constants.dart';
 import 'package:flutflix/models/movie.dart';
 import 'package:flutflix/models/tv_show.dart';
 import 'package:flutflix/widgets/bottom_navigation_bar.dart';
+import 'package:flutflix/widgets/back_button.dart';
 import 'package:flutflix/widgets/movie_page_buttons.dart';
 import 'package:flutflix/widgets/rating_star.dart';
 import 'package:flutflix/widgets/recommendationWidget.dart';

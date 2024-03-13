@@ -66,7 +66,7 @@ class RecommendationWidget<T> extends StatelessWidget {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: Image.network(
-                        '${Constants.imagePath}${recommendation is Movie ? recommendation.posterPath : (recommendation as TvShow).backdropPath}',
+                        '${Constants.imagePath}${recommendation is Movie ? recommendation.posterPath : (recommendation as TvShow).posterPath}',
                         height: 130,
                         width: 120,
                         fit: BoxFit.fill,

@@ -1,6 +1,9 @@
+import 'package:flutflix/models/movie.dart';
+import 'package:flutflix/models/tv_show.dart';
+import 'package:flutflix/screens/details_screen.dart';
+import 'package:flutter/material.dart';
 import 'package:flutflix/widgets/bottom_navigation_bar.dart';
 import 'package:flutflix/widgets/watch_later_service.dart';
-import 'package:flutter/material.dart';
 
 class WatchLaterScreen extends StatefulWidget {
   @override
@@ -29,6 +32,11 @@ class _WatchLaterScreenState extends State<WatchLaterScreen>
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    int crossAxisCount =
+        screenWidth < 600 ? 2 : 4; // Adjust based on screen width
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Watch Later'),
@@ -52,58 +60,76 @@ class _WatchLaterScreenState extends State<WatchLaterScreen>
               } else if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}');
               } else {
-// Inside the GridView.builder for movies
                 return GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2, // Number of items per row
-                    crossAxisSpacing: 8.0, // Spacing between items horizontally
-                    mainAxisSpacing: 8.0, // Spacing between rows
+                    crossAxisCount: crossAxisCount,
+                    crossAxisSpacing: 8.0,
+                    mainAxisSpacing: 8.0,
                   ),
                   itemCount: snapshot.data!.length,
                   itemBuilder: (context, index) {
-                    return Stack(
-                      children: [
-                        Image.network(
-                          'https://image.tmdb.org/t/p/w500${snapshot.data![index]['poster_path']}',
-                          fit: BoxFit.fill,
-                          width: double.infinity,
-                          height: double.infinity,
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: Container(
-                            padding: EdgeInsets.all(8.0),
-                            color: Colors.black.withOpacity(0.7),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  snapshot.data![index]['title'],
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 16),
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.remove_circle_outline,
-                                      color: Colors.red),
-                                  onPressed: () async {
-                                    String itemId =
-                                        snapshot.data![index]['id'].toString();
-                                    await WatchLaterService()
-                                        .removeFromWatchLater(
-                                            'watchLaterMovies', itemId);
-                                    setState(() {
-                                      _moviesFuture = WatchLaterService()
-                                          .loadWatchLater('watchLaterMovies');
-                                    });
-                                  },
-                                ),
-                              ],
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MovieScreen(
+                              movie: Movie.fromJson(snapshot.data![index]),
+                              tvShow: null,
+                              result: null,
                             ),
                           ),
-                        ),
-                      ],
+                        );
+                      },
+                      child: Stack(
+                        children: [
+                          Image.network(
+                            'https://image.tmdb.org/t/p/w500${snapshot.data![index]['poster_path']}',
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: Container(
+                              padding: EdgeInsets.all(8.0),
+                              color: Colors.black.withOpacity(0.7),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    snapshot.data![index]['title'],
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.remove_circle_outline,
+                                      color: Colors.red,
+                                    ),
+                                    onPressed: () async {
+                                      String itemId = snapshot.data![index]
+                                              ['id']
+                                          .toString();
+                                      await WatchLaterService()
+                                          .removeFromWatchLater(
+                                              'watchLaterMovies', itemId);
+                                      setState(() {
+                                        _moviesFuture = WatchLaterService()
+                                            .loadWatchLater('watchLaterMovies');
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   },
                 );
@@ -119,58 +145,77 @@ class _WatchLaterScreenState extends State<WatchLaterScreen>
               } else if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}');
               } else {
-// Inside the GridView.builder for TV shows
                 return GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2, // Number of items per row
-                    crossAxisSpacing: 8.0, // Spacing between items horizontally
-                    mainAxisSpacing: 8.0, // Spacing between rows
+                    crossAxisCount: crossAxisCount,
+                    crossAxisSpacing: 8.0,
+                    mainAxisSpacing: 8.0,
                   ),
                   itemCount: snapshot.data!.length,
                   itemBuilder: (context, index) {
-                    return Stack(
-                      children: [
-                        Image.network(
-                          'https://image.tmdb.org/t/p/w500${snapshot.data![index]['poster_path']}',
-                          fit: BoxFit.fill,
-                          width: double.infinity,
-                          height: double.infinity,
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: Container(
-                            padding: EdgeInsets.all(8.0),
-                            color: Colors.black.withOpacity(0.7),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  snapshot.data![index]['name'],
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 16),
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.remove_circle_outline,
-                                      color: Colors.red),
-                                  onPressed: () async {
-                                    String itemId =
-                                        snapshot.data![index]['id'].toString();
-                                    await WatchLaterService()
-                                        .removeFromWatchLater(
-                                            'watchLaterTVShows', itemId);
-                                    setState(() {
-                                      _tvShowsFuture = WatchLaterService()
-                                          .loadWatchLater('watchLaterTVShows');
-                                    });
-                                  },
-                                ),
-                              ],
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MovieScreen(
+                              movie: null,
+                              tvShow: TvShow.fromJson(snapshot.data![index]),
+                              result: null,
                             ),
                           ),
-                        ),
-                      ],
+                        );
+                      },
+                      child: Stack(
+                        children: [
+                          Image.network(
+                            'https://image.tmdb.org/t/p/w500${snapshot.data![index]['poster_path']}',
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: Container(
+                              padding: EdgeInsets.all(8.0),
+                              color: Colors.black.withOpacity(0.7),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    snapshot.data![index]['name'],
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.remove_circle_outline,
+                                      color: Colors.red,
+                                    ),
+                                    onPressed: () async {
+                                      String itemId = snapshot.data![index]
+                                              ['id']
+                                          .toString();
+                                      await WatchLaterService()
+                                          .removeFromWatchLater(
+                                              'watchLaterTVShows', itemId);
+                                      setState(() {
+                                        _tvShowsFuture = WatchLaterService()
+                                            .loadWatchLater(
+                                                'watchLaterTVShows');
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   },
                 );

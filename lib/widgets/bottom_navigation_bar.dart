@@ -28,7 +28,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
         children: [
           InkWell(
             onTap: () {
-              Navigator.pushNamed(context, "/");
+              Navigator.pushNamed(context, "home");
             },
             child: Icon(
               Icons.home,

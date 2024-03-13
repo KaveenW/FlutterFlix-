@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutflix/widgets/bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -105,6 +106,11 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    int crossAxisCount =
+        screenWidth < 600 ? 2 : 4; // Adjust based on screen width
+
     return Scaffold(
       appBar: AppBar(
         title: TextField(
@@ -119,8 +125,8 @@ class _SearchScreenState extends State<SearchScreen> {
           ? const Center(child: CircularProgressIndicator())
           : _searchResults.isNotEmpty
               ? GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
                     crossAxisSpacing: 8.0,
                     mainAxisSpacing: 8.0,
                   ),
@@ -161,6 +167,10 @@ class _SearchScreenState extends State<SearchScreen> {
               : const Center(
                   child: Text('No results found'),
                 ),
+      bottomNavigationBar: CustomBottomNavigationBar(
+        currentIndex: 0,
+        onTap: (index) {},
+      ),
     );
   }
 
